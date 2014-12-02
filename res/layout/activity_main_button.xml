@@ -1,0 +1,72 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="2" >
+
+        <ImageView
+            android:id="@+id/padLeft"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/pad_up" />
+
+        <ImageView
+            android:id="@+id/padCenter"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_below="@+id/padLeft"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/pad_center" />
+
+        <ImageView
+            android:id="@+id/padRight"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_below="@+id/padCenter"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/pad_down" />
+
+        <ImageView
+            android:id="@+id/padUp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_below="@+id/padLeft"
+            android:layout_toRightOf="@+id/padLeft"
+            android:src="@drawable/pad_right" />
+
+        <ImageView
+            android:id="@+id/padDown"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_below="@+id/padLeft"
+            android:layout_toLeftOf="@+id/padLeft"
+            android:src="@drawable/pad_left" />
+    </RelativeLayout>
+    
+    <LinearLayout
+        android:layout_height="150dp"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+	    android:background="#6dcff6">
+
+		<ImageButton
+		    android:id="@+id/rocket"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:background="#6dcff6"
+		    android:contentDescription="@string/rocketButton"
+		    android:rotation="90"
+		    android:scaleType="fitCenter"
+		    android:src="@drawable/rocket" />
+
+    </LinearLayout>
+
+</LinearLayout>

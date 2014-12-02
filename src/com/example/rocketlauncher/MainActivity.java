@@ -1,7 +1,11 @@
 package com.example.rocketlauncher;
 
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -20,7 +24,7 @@ public class MainActivity extends Activity {
 	
 	private FrameLayout touchZone;
 	private ImageButton rocketLaunch;
-	private Joystick joystick;
+	public Joystick joystick;
 	private int middleX, middleY;
 	
 	@Override
@@ -36,11 +40,46 @@ public class MainActivity extends Activity {
 		middleY = getWindowManager().getDefaultDisplay().getHeight()/3;
 		joystick.setXLoc(middleX);
 		joystick.setYLoc(middleY);
+		joystick.setOrigX(middleX);
+		joystick.setOrigY(middleY);
 		touchZone.addView(joystick);
 		
 		calc = new Calcul(middleX, middleY);
 		
 		Log.i(TAG, "middle of the frame : x ="+middleX+" , y ="+middleY);
+		
+
+		/*
+		Thread thread = new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				while(true){
+					Log.i(TAG, "DIRECTION : "+calc.giveMeDirection(joystick.getX(),joystick.getY()));
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+				}
+			}
+			
+		});
+		*/
+		
+		
+		TimerTask task = new TimerTask(){
+
+			@Override
+			public void run() {
+				sendEvent();
+			}
+			
+		};
+		final Timer timer = new Timer(true);
+		timer.scheduleAtFixedRate(task, 0, 1000);
+		
 		
 		touchZone.setOnTouchListener(new OnTouchListener(){
 			public boolean onTouch(View v, MotionEvent event) {
@@ -55,7 +94,7 @@ public class MainActivity extends Activity {
 					joystick.setYLoc(event.getY(pointerIndex));
 					joystick.invalidate();
 					Log.i(TAG, "new touch !");
-
+					
 					break;
 				}
 				case MotionEvent.ACTION_UP:
@@ -64,7 +103,7 @@ public class MainActivity extends Activity {
 					joystick.setXLoc(middleX);
 					joystick.setYLoc(middleY);
 					joystick.invalidate();
-					Log.i(TAG, "touch up - go back origin !");
+					//Log.i(TAG, "touch up - go back origin !");
 					break;
 				}
 				case MotionEvent.ACTION_MOVE:{
@@ -75,7 +114,7 @@ public class MainActivity extends Activity {
 						joystick.setXLoc(event.getX(pointerIndex));
 						joystick.setYLoc(event.getY(pointerIndex));
 						//Log.i(TAG, "moving - angle : "+Calcul.giveMyAngle(event.getX(pointerIndex), event.getY(pointerIndex)));
-						Log.i(TAG, "moving - direction : "+calc.giveMeDirection(event.getX(pointerIndex), event.getY(pointerIndex)));
+						//Log.i(TAG, "moving - direction : "+calc.giveMeDirection(event.getX(pointerIndex), event.getY(pointerIndex)));
 						joystick.invalidate();
 					}
 					break;
@@ -97,59 +136,11 @@ public class MainActivity extends Activity {
 				Log.i(TAG, "FIRE - missile launched !");
 			}
 		});
-	}
-}
-
-class Calcul{
-	private static float Ox;
-	private static float Oy;
-	public enum Direction{
-		RIGHT,
-		LEFT,
-		UP,
-		UP_RIGHT,
-		UP_LEFT,
-		DOWN,
-		DOWN_RIGHT,
-		DOWN_LEFT,
-		UNKNOWN
-	}
-	
-	public Calcul(int x, int y){
-		Ox=x;
-		Oy=y;
-	}
-	
-	public static double giveMyAngle(float x, float y){
-		float mX = x-Ox;
-		float mY = y-Oy;
-		return (2*Math.atan(mY/(mX+(Math.sqrt(mX*mX + mY*mY)))));
-	}
-	
-	public Direction giveMeDirection(float x, float y){
-		double angle = giveMyAngle(x, y);
-		if(isBetween(angle, -Math.PI, -5*Math.PI/6) || isBetween(angle, 5*Math.PI/6, Math.PI))
-			return Direction.DOWN;
-		else if(isBetween(angle, -5*Math.PI/6, -2*Math.PI/3))
-			return Direction.DOWN_LEFT;
-		else if(isBetween(angle, -2*Math.PI/3, -Math.PI/3))
-			return Direction.LEFT;
-		else if(isBetween(angle, -Math.PI/3, -Math.PI/6))
-			return Direction.UP_LEFT;
-		else if(isBetween(angle, -Math.PI/6, Math.PI/6))
-			return Direction.UP;
-		else if(isBetween(angle, Math.PI/6, Math.PI/3))
-			return Direction.UP_RIGHT;
-		else if(isBetween(angle, Math.PI/3, 2*Math.PI/3))
-			return Direction.RIGHT;
-		else if(isBetween(angle, 2*Math.PI/3, 5*Math.PI/6))
-			return Direction.DOWN_RIGHT;
-		else
-			return null;
 		
 	}
 	
-	private boolean isBetween(double val, double min, double max){
-		return (min <= val)&&(val <= max);
+	public void sendEvent(){
+		Log.i(TAG, "X : "+joystick.getX()+" , y = "+joystick.getY());
+		Log.i(TAG, "DIRECTION : "+calc.giveMeDirection(joystick.getX(),joystick.getY()));
 	}
 }

@@ -9,35 +9,54 @@ import android.view.View;
 
 public class Joystick extends View {
 	
-	private float lX,lY;
-	final private static int SIZE = 60;
+	private float lX,lY, origX, origY;
+	final private static int SIZE = 40;
 	final private Paint paint = new Paint();
 	
 	public Joystick(Context x) {
 		super(x);
 		lX = 0;
 		lY = 0;
+		origX =0;
+		origY =0;
 		paint.setStyle(Style.FILL);
 		paint.setColor(Color.BLUE);
 	}
 	
-	float getXLoc() {
+	public synchronized float getXLoc() {
 		return lX;
 	}
 
-	void setXLoc(float x) {
+	public synchronized void setXLoc(float x) {
 		lX = x;
 	}
 
-	float getYLoc() {
+	public synchronized float getYLoc() {
 		return lY;
 	}
 
-	void setYLoc(float y) {
+	public synchronized void setYLoc(float y) {
 		lY = y;
+	}
+	
+	public synchronized float getOrigX() {
+		return origX;
+	}
+
+	public synchronized void setOrigX(float y) {
+		origX = y;
+	}
+	
+	public synchronized float getOrigY() {
+		return origY;
+	}
+
+	public synchronized void setOrigY(float y) {
+		origY = y;
 	}
 
 	protected void onDraw(Canvas canvas) {
 		canvas.drawCircle(lX, lY, SIZE, paint);
+		canvas.drawCircle(origX, origY, SIZE, paint);
 	}
 }
