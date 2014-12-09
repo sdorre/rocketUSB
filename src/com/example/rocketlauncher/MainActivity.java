@@ -1,146 +1,101 @@
 package com.example.rocketlauncher;
 
-
-import java.util.Timer;
-import java.util.TimerTask;
-
+import com.example.android.libturretctl.TurretCtl;
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
-public class MainActivity extends Activity {
+public class MainActivityc extends Activity implements OnClickListener{
 
-	private static final String TAG = "rocketLauncher";
-	private static final int MIN_DIST = 2;
-	
-	private Calcul calc;
-	
-	private FrameLayout touchZone;
-	private ImageButton rocketLaunch;
-	public Joystick joystick;
-	private int middleX, middleY;
-	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		
-		touchZone = (FrameLayout) findViewById(R.id.touchZone);
-		rocketLaunch = (ImageButton) findViewById(R.id.rocket);
-		joystick = new Joystick(this);
-		
-		middleX = getWindowManager().getDefaultDisplay().getWidth()/2;
-		middleY = getWindowManager().getDefaultDisplay().getHeight()/3;
-		joystick.setXLoc(middleX);
-		joystick.setYLoc(middleY);
-		joystick.setOrigX(middleX);
-		joystick.setOrigY(middleY);
-		touchZone.addView(joystick);
-		
-		calc = new Calcul(middleX, middleY);
-		
-		Log.i(TAG, "middle of the frame : x ="+middleX+" , y ="+middleY);
-		
+    private static final String TAG = "rocketLauncher";
 
-		/*
-		Thread thread = new Thread(new Runnable(){
+    private ImageView padCenter;
+    private ImageView padUp;
+    private ImageView padDown;
+    private ImageView padRight;
+    private ImageView padLeft;
 
-			@Override
-			public void run() {
-				while(true){
-					Log.i(TAG, "DIRECTION : "+calc.giveMeDirection(joystick.getX(),joystick.getY()));
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					
-				}
-			}
-			
-		});
-		*/
-		
-		
-		TimerTask task = new TimerTask(){
+    private ImageButton rocketLaunch;
 
-			@Override
-			public void run() {
-				sendEvent();
-			}
-			
-		};
-		final Timer timer = new Timer(true);
-		timer.scheduleAtFixedRate(task, 0, 1000);
-		
-		
-		touchZone.setOnTouchListener(new OnTouchListener(){
-			public boolean onTouch(View v, MotionEvent event) {
-				
-				switch(event.getActionMasked()){
-				
-				case MotionEvent.ACTION_DOWN:
-				case MotionEvent.ACTION_POINTER_DOWN:{
-					int pointerIndex = event.getActionIndex();
+    private TurretCtl turret;
 
-					joystick.setXLoc(event.getX(pointerIndex));
-					joystick.setYLoc(event.getY(pointerIndex));
-					joystick.invalidate();
-					Log.i(TAG, "new touch !");
-					
-					break;
-				}
-				case MotionEvent.ACTION_UP:
-				case MotionEvent.ACTION_POINTER_UP:{
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-					joystick.setXLoc(middleX);
-					joystick.setYLoc(middleY);
-					joystick.invalidate();
-					//Log.i(TAG, "touch up - go back origin !");
-					break;
-				}
-				case MotionEvent.ACTION_MOVE:{
-					int pointerIndex = event.getActionIndex();
+        padCenter = (ImageView) findViewById(R.id.padCenter);
+        padCenter.setOnClickListener(this);
 
-					if (Math.abs(joystick.getXLoc() - event.getX(pointerIndex)) > MIN_DIST
-							|| Math.abs(joystick.getYLoc() - event.getY(pointerIndex)) > MIN_DIST) {
-						joystick.setXLoc(event.getX(pointerIndex));
-						joystick.setYLoc(event.getY(pointerIndex));
-						//Log.i(TAG, "moving - angle : "+Calcul.giveMyAngle(event.getX(pointerIndex), event.getY(pointerIndex)));
-						//Log.i(TAG, "moving - direction : "+calc.giveMeDirection(event.getX(pointerIndex), event.getY(pointerIndex)));
-						joystick.invalidate();
-					}
-					break;
-				}
-				default:
-					Log.i(TAG, "unhandled event");
-				}
-				
-				return true;
-			}
-		});
-		
-		
-		rocketLaunch.setOnClickListener(new OnClickListener(){
+        padUp = (ImageView) findViewById(R.id.padUp);
+        padUp.setOnClickListener(this);
 
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Log.i(TAG, "FIRE - missile launched !");
-			}
-		});
-		
-	}
-	
-	public void sendEvent(){
-		Log.i(TAG, "X : "+joystick.getX()+" , y = "+joystick.getY());
-		Log.i(TAG, "DIRECTION : "+calc.giveMeDirection(joystick.getX(),joystick.getY()));
-	}
+        padDown = (ImageView) findViewById(R.id.padDown);
+        padDown.setOnClickListener(this);
+
+        padRight = (ImageView) findViewById(R.id.padRight);
+        padRight.setOnClickListener(this);
+
+        padLeft = (ImageView) findViewById(R.id.padLeft);
+        padLeft.setOnClickListener(this);
+
+        rocketLaunch = (ImageButton) findViewById(R.id.rocket);
+        rocketLaunch.setOnClickListener(this);
+
+        turret = new TurretCtl();
+        turret.initUsb();
+    }
+
+    @Override
+    public void onClick(View v) {
+        try {
+            switch(v.getId()){
+                case R.id.padCenter:
+                    Log.i(TAG, "STOP");
+                    turret.stop();
+                    Thread.sleep(2000);
+                    break;
+
+                case R.id.padDown:
+                    Log.i(TAG, "MOVE DOWN");
+                    turret.moveDown();
+                    Thread.sleep(2000);
+                    break;
+
+                case R.id.padLeft:
+                    Log.i(TAG, "MOVE LEFT");
+                    turret.moveLeft();
+                    Thread.sleep(2000);
+                    break;
+
+                case R.id.padRight:
+                    Log.i(TAG, "MOVE RIGHT");
+                    turret.moveRight();
+                    Thread.sleep(2000);
+                    break;
+
+                case R.id.padUp:
+                    Log.i(TAG, "MOVE UP");
+                    turret.moveUp();
+                    Thread.sleep(2000);
+                    break;
+
+                case R.id.rocket:
+                    Log.i(TAG, "FIRE - missile launched !");
+                    turret.fire();
+                    Thread.sleep(2000);
+                    break;
+            }
+        } catch(InterruptedException e) {}
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        turret.freeUsb();
+    }
 }
